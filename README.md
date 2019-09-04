@@ -1,2 +1,2 @@
 # site_index
-A Python module for working with various forest height growth and site index functions.
+A Python package for forest height growth and site index functions.
