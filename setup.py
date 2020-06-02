@@ -15,10 +15,10 @@ with open('readme.md') as f:
     description = buff.split('\n')[2].strip()
     long_description = buff.strip()
     
-shutil.copyfile('./readme.md', 'site_index/readme.md')
+shutil.copyfile('./readme.md', 'pysiteindex/readme.md')
 
 setup(
-    name='site_index'
+    name='pysiteindex'
     , version=version
     , description=description
     , author='Tod Haren'
@@ -27,6 +27,6 @@ setup(
     , packages=find_packages()
     # , package_dir={'':'src'}
     , entry_points={
-        'console_scripts' : ['site = site_index.__main__:cli',]
+        'console_scripts' : ['pysi=pysiteindex.__main__:cli',]
         }
 )

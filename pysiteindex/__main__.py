@@ -11,9 +11,9 @@ import numpy as np
 import pandas as pd
 import click
 
-import site_index
-import site_index.si
-from site_index import curves
+import pysiteindex
+import pysiteindex.si
+from pysiteindex import curves
 
 # Declare the package name if needed
 if __name__ == '__main__' and __package__ is None:
@@ -24,10 +24,10 @@ if __name__ == '__main__' and __package__ is None:
     importlib.import_module(__package__)
 
 def curve_docs():
-    keys = sorted(site_index.curves.keys())
+    keys = sorted(pysiteindex.curves.keys())
     msg = 'Available Site Index Curves:\n'
     for key in keys:
-        sf = site_index.curves[key]
+        sf = pysiteindex.curves[key]
         try:
             if key=='fvs':
                 sc = sf('PN','DF',708)
