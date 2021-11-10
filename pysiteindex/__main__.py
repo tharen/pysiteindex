@@ -68,7 +68,7 @@ def si(curve, age, height, variant=None, forest=0, species=None):
 
 @click.command()
 @click.option('--curve', '-c', required=True, help='Site curve name.')
-@click.option('--age', '-a', required=True, type=float, help='Tree age - BHA, TTA, etc. see curve description.')
+@click.option('--age', '-a', required=True, multiple=True, type=float, help='Tree age - BHA, TTA, etc. see curve description.')
 @click.option('--site-index', '-i', required=True, type=float, help='Site index - See curve description.')
 @click.option('--variant', '-v', required=False, type=str, help='FVS variant abbreviation when curve="fvs".')
 @click.option('--forest', '-f', required=False, type=int, default=0, help='FVS forest code when curve="fvs".')
@@ -84,13 +84,19 @@ def ht(curve, age, site_index, variant=None, forest=0, species=None):
         raise AttributeError('A FVS variant (e.g. -v=pn) is required for curve=="fvs"')
 
     sc = curves[curve](variant, species, forest_code=forest)
-    ht = sc.height(age, site_index)
+
     if sc.index_bha:
         ref = 'bha'
     else:
         ref = 'tta'
-        
-    print('{:.2f}{} @{}={}'.format(ht, sc.units, ref, age))
+
+    hts = {}
+    for a in age:
+        ht = sc.height(a, site_index)
+        hts[a] = ht
+
+    for a,ht in hts.items():
+        print('{:.2f}{} @{}={}'.format(ht, sc.units, ref, a))
     
 @click.group(invoke_without_command=True)
 @click.option('--help-curves', is_flag=True, default=False, help='Return a list of supported site curve funtions.')
