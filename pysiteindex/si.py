@@ -971,9 +971,9 @@ class FVS_SiteCurve(SiteCurve):
     @property
     def forest_idx(self):
         """Index of the FVS forest location code."""
-        self.fvs.plot_mod.kodfor = [self.forest_code, ]
-        self.fvs.forkod()
-        return self.fvs.plot_mod.ifor
+        self.fvs.globals.kodfor = [self.forest_code, ]
+        # self.fvs.forkod()
+        return self.fvs.globals.ifor
 
     @property
     def name(self):
@@ -1002,10 +1002,10 @@ class FVS_SiteCurve(SiteCurve):
 
         if self.fvs_variant in ('PN', 'WC'):
             ht = self.fvs.htcalc(si, self.spp_idx, bha)
-
+            
         elif self.fvs_variant in ('SO', 'CA', 'OC'):
             ht = self.fvs.htcalc(self.forest_idx, si, self.spp_idx, bha)
-
+            
         else:
             logging.warn('Height not fully implemented for variant: {}'.format(
                     self.fvs_variant))
