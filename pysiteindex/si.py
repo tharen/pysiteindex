@@ -972,7 +972,7 @@ class FVS_SiteCurve(SiteCurve):
     def forest_idx(self):
         """Index of the FVS forest location code."""
         self.fvs.globals.kodfor = [self.forest_code, ]
-        # self.fvs.forkod()
+        self.fvs.forkod()
         return self.fvs.globals.ifor
 
     @property
