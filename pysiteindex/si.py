@@ -32,7 +32,7 @@ def find_si(
         , max_iters=20, ht_err=0.1):
     """
     Estimate the site index value that best matches the ht, age pair.
-    
+
     Args
     ----
     ht_func: Function to estimate height given an age and site index.
@@ -42,15 +42,15 @@ def find_si(
     max_si: Maximum valid site index.
     max_iters: Maximum number of search iterations to perform.
     ht_err: Allowable height tolerance.
-    
+
     Return
     ------
     si: Estimated site index
     """
-    
+
     if (ht is None) or (not np.isfinite(ht)) or (ht<=0.0):
         return -1 * np.Inf
-    
+
     # First check the bounds of the search
     min_ht = ht_func(bha, min_si)
     if min_ht > ht:
@@ -88,7 +88,7 @@ def find_bha(
         , min_ht=0, max_ht=500):
     """
     Estimate breast height age for a site index.
-    
+
     Args
     ----
     ht_func: Function to estimate height given an age and site index.
@@ -97,11 +97,11 @@ def find_bha(
     max_bha: Maximum possible tree breast height age.
     ht_err: Height error tolerance.
     max_steps: Maximum number of search steps to attempt
-    
+
     Return
     ------
     bha: Estimated breast height age
-    
+
     Ref
     ---
     Adapted from:
@@ -148,8 +148,8 @@ def find_bha(
 class SiteCurve(object):
     """
     Parent class with utility methods for site index (height growth) curves.
-    
-    All subclasses must override the `height` method, which is assumed to 
+
+    All subclasses must override the `height` method, which is assumed to
     predict height as a function of age and site index.
     """
     __metaclass__ = abc.ABCMeta
@@ -191,15 +191,15 @@ class SiteCurve(object):
     def site_index(self, bha, ht):
         """
         Return and estimate of site index given an age, height pair.
-        
+
         NOTE: If not implemented the `find_si` search function is used.
         """
-        si = self.find_si(bha, ht)        
+        si = self.find_si(bha, ht)
         return si
 
     def v_height(self, bha, si):
         """
-        Return and array of heights.  Vectorized form of `self.height`. 
+        Return and array of heights.  Vectorized form of `self.height`.
         """
         func = np.vectorize(self.height)
         ht = func(bha, si)
@@ -256,7 +256,7 @@ class SiteCurve(object):
         if max_ht is None: max_ht = self.max_ht
         if min_si is None: min_si = self.min_si
         if max_si is None: max_si = self.max_si
-        
+
         ht = np.arange(min_ht, max_ht + 1, 1)
 
         if not hasattr(bha_incr, '__iter__'):
@@ -279,7 +279,7 @@ class SiteCurve(object):
     def find_bha(self, si, ht, ht_err=0.1, max_steps=50):
         """
         Return an estimate of breast height age for a site_index, height pair.
-        
+
         NOTE: BHA is found using a binary search method.
         """
         bha = find_bha(self.height, si, ht, ht_err=ht_err, max_steps=max_steps
@@ -340,7 +340,7 @@ class SiteCurve(object):
 
         if max_bha is None:
             max_bha = self.index_age * 3
-            
+
         keys = ['min_bha', 'max_bha', 'si_incr', 'min_si', 'max_si']
         args = {}
         for k in keys:
@@ -369,7 +369,7 @@ class SiteCurve(object):
         p = ax.set_ylabel('Total Height (ft)')
 
         ax.axvline(self.index_age, color='grey', linestyle='dashed', linewidth=1.0)
-        
+
         # ax.set_xlim(0,self.index_age*3)
 
         return ax
@@ -383,13 +383,13 @@ class SiteCurve(object):
 
         if max_bha is None:
             max_bha = int(round(self.index_age*3.0/10.0)*10)
-        
+
         if min_bha is None:
             min_bha = int(round(self.index_age/3.0/10.0)*10)
-        
+
         bha_incr = int((max_bha - min_bha) / 9.0)
         bha_incr = min([10,15,20], key=lambda x:abs(x-bha_incr))
-            
+
         tbl = self.site_index_table(
                 min_bha, max_bha, bha_incr, min_ht, max_ht, min_si, max_si
                 )
@@ -436,12 +436,12 @@ class DF_King_SiteCurve(SiteCurve):
     def height(bha, si):
         """
         Return total height using King (1966).
-        
+
         Args
         ----
         bha - Breast Height Age
         si - Site Index (total height at bha==50)
-        
+
         Refs
         ----
         King (1966)
@@ -467,10 +467,10 @@ class DF_King_SiteCurve(SiteCurve):
     def site_index(bha, ht):
         """
         Return King's site index given total height and breast height age.
-        
-        This solves King's total height formula for site index by substituting 
+
+        This solves King's total height formula for site index by substituting
             the coefficient predictor equations and factoring out Z for bha 50.
-        
+
         Args
         ----
         bha - Breast Height Age
@@ -581,10 +581,10 @@ class DF_Bruce_SiteCurve(SiteCurve):
                 + 0.793548 * (si / 100) ** 2.0
                 - 0.171666 * (si / 100) ** 3.0
                 )
-        
+
         z = ((13.25 - si / 20) ** b3 - (63.25 - si / 20) ** b3)
         b2 = np.log(4.5 / si) / z
-        
+
         ht = si * np.exp(b2 * ((bha + ytb) ** b3 - (50 + ytb) ** b3))
 
         return ht
@@ -634,11 +634,11 @@ class RA_Harrington_SiteCurve(SiteCurve):
     def site_index_direct(bha, ht):
         """
         Harrington (1986)
-        
+
         NOTE: This is the independently fit SI function. Harrington argues
                 that solving for SI as the dependent variable is more
                 correct for predicting SI than simply solving the height
-                growth function for SI. 
+                growth function for SI.
         """
         if bha <= 0:
             return 0.0
@@ -692,9 +692,9 @@ class SS_Farr_SiteCurve(SiteCurve):
     def height(bha, si):
         """
         Sitka spruce, Farr, Res. Paper PNW-326
-        
+
         Also used for Western red cedar.
-        
+
         NOTE: Adapted from FVS PN variant `htcalc.f`
         """
         B0 = -0.2050542
@@ -738,9 +738,9 @@ class DF_Curtis_SiteCurve(SiteCurve):
     def height(bha, si):
         """
         Douglas-fir, Curtis, 1972
-        
+
         Used for "other" species in FVS
-        
+
         NOTE: Adapted from FVS (PN, WC) source code `htcalc.f`.
         """
 
@@ -759,22 +759,22 @@ class DF_Curtis_SiteCurve(SiteCurve):
 class DF_SMC_SiteCurve(SiteCurve):
     """
     Douglas-fir site curves produced for the Stand Management Cooperative.
-    
+
     Args
     ----
     max_age: Maximum age to project site index and height
     units: Height units 'ft' or 'm'
     convergence: Convergence criterion (see DFSITE documents)
     ht_plant: Tree height at planting, fixed at two years of age.
-    
+
     Reference
     ---------
-    Height-age curves for planted stands of Douglas fir, with 
-        adjustments for density. A report prepared for the Stand Management 
-        Coop, March 30, 2000 (revised December, 2000). By James Flewelling, 
+    Height-age curves for planted stands of Douglas fir, with
+        adjustments for density. A report prepared for the Stand Management
+        Coop, March 30, 2000 (revised December, 2000). By James Flewelling,
         Randy Collier, Bob Gonyea, David Marshall and Eric Turnblom.
     """
-    
+
     __curve_name__ = 'smc_2001'
     def __init__(self, *args, **kwargs):
         #max_age=100, units='ft', convergence=0.5 / 12.0, ht_plant=1.4
@@ -787,7 +787,7 @@ class DF_SMC_SiteCurve(SiteCurve):
             self._units = 1
         else:
             self._units = 2
-            
+
         SiteCurve.__init__(self
                 , name='Douglas-fir, SMC (2001)'
                 , abbreviation='SMC (2001)'
@@ -802,10 +802,10 @@ class DF_SMC_SiteCurve(SiteCurve):
         """
         Initialize the dfsite library
         """
-        
+
         if not 'smc_dfsite' in sys.modules:
             raise SystemError('smc_dfsite is not available')
-        
+
         err = smc_dfsite.dfsite1(self.max_age, self._units, self.convergence)
         smc_dfsite.dfsite2(self.ht_plant)
 
@@ -826,11 +826,11 @@ class DF_SMC_SiteCurve(SiteCurve):
     def height(self, tta, si):
         """
         Return an estimate of total height for a given site index and age.
-        
+
         Args
         ----
         tta - Tree age (from seed).
-        si - Site index.        
+        si - Site index.
         """
         self.setup()
         psi, si, err = smc_dfsite.dfsite3h(si, 1, self.index_age)
@@ -840,7 +840,7 @@ class DF_SMC_SiteCurve(SiteCurve):
     def site_index(self, tta, ht):
         """
         Return and estimate of site index given a total age, height pair.
-        
+
         Args
         ----
         tta: Tree age (from seed)
@@ -851,10 +851,10 @@ class DF_SMC_SiteCurve(SiteCurve):
 
 class FVS_SiteCurve(SiteCurve):
     """
-    Species site curves embedded in FVS variant libraries.  
+    Species site curves embedded in FVS variant libraries.
     """
     __curve_name__ = 'fvs'
-    
+
     def __init__(self, fvs_variant, spp, forest_code=0, *args, **kwargs):
         self.fvs_variant = fvs_variant.upper()
         self.spp = spp.upper()
@@ -884,23 +884,23 @@ class FVS_SiteCurve(SiteCurve):
             if self.spp in ('WH', 'SS', 'GF', 'WF', 'LP'):
                 idx_age = 50
                 max_si = 200
-            
+
             elif self.spp in ('DF',):
                 idx_age = 100
                 max_si = 300
-                
+
             elif self.spp in ('RA',):
                 idx_age = 20
                 max_si = 200
-        
+
         elif self.fvs_variant in ('CA'):
                 idx_age = 50
                 max_si = 200
-        
+
         elif self.fvs_variant in ('SO'):
                 idx_age = 50
                 max_si = 200
-                
+
                 if self.spp in ('SP','PP','MH','ES','WJ','WB','AF','NF','WC'):
                     idx_age = 100
                     max_si = 200
@@ -933,9 +933,9 @@ class FVS_SiteCurve(SiteCurve):
                 f'Expected one of {list(self.fvs.spp_codes)}'
                 )
             raise ValueError(msg)
-        
+
         self.spp_idx = list(self.fvs.spp_codes).index(self.spp) + 1
-        
+
         # try:
             # if not self.spp in list(self.fvs.spp_codes):
                 # if self.fvs_variant in ('SO', 'CA'):
@@ -951,9 +951,9 @@ class FVS_SiteCurve(SiteCurve):
 
             # else:
                 # self.spp_idx = list(self.fvs.spp_codes).index(self.spp) + 1
-            
+
             # self.spp_valid = True
-            
+
         # except ValueError:
             # logging.info('Site species code not found for {}, defaulting to "OT"'.format(self.spp))
             # self.spp_idx = list(self.fvs.spp_codes).index('OT') + 1
@@ -971,9 +971,9 @@ class FVS_SiteCurve(SiteCurve):
     @property
     def forest_idx(self):
         """Index of the FVS forest location code."""
-        self.fvs.plot_mod.kodfor = [self.forest_code, ]
+        self.fvs.globals.kodfor = [self.forest_code, ]
         self.fvs.forkod()
-        return self.fvs.plot_mod.ifor
+        return self.fvs.globals.ifor
 
     @property
     def name(self):
@@ -997,7 +997,7 @@ class FVS_SiteCurve(SiteCurve):
 
     def height(self, bha, si):
         """
-        
+
         """
 
         if self.fvs_variant in ('PN', 'WC'):
