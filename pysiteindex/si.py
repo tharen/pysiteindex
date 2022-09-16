@@ -858,6 +858,7 @@ class FVS_SiteCurve(SiteCurve):
     def __init__(self, fvs_variant, spp, forest_code=0, *args, **kwargs):
         self.fvs_variant = fvs_variant.upper()
         self.spp = spp.upper()
+        ## TODO: Get default forest code from FVS
         self.forest_code = forest_code
 
         self.fvs = None
@@ -917,7 +918,7 @@ class FVS_SiteCurve(SiteCurve):
         # FIXME: units for some variants are metric
         SiteCurve.__init__(self
                 , name='FVS Variant Site Curve'
-                , abbreviation='FVS'
+                , abbreviation=self.abbreviation
                 , index_age=idx_age, index_bha=True
                 , min_si=min_si
                 , max_si=max_si
@@ -959,8 +960,9 @@ class FVS_SiteCurve(SiteCurve):
             # self.spp_idx = list(self.fvs.spp_codes).index('OT') + 1
             # spp_valid = False
 
-        if self.forest_idx == 0:
-            logging.warn('Forest code {} is not recognized.'.format(self.forest_code))
+        ## TODO: re-enable if FVS default kodfor is fixed
+        # if self.forest_idx == 0:
+        #     logging.warn('Forest code {} is not recognized.'.format(self.forest_code))
 
 #         idx_ages = {'PN':{
 #                 100:('SF','NF','WP','SP','PP','IC','JP','OT','RF','MH',)
@@ -978,7 +980,7 @@ class FVS_SiteCurve(SiteCurve):
     @property
     def name(self):
         # TODO: Interogate the FVS library for references???
-        s = 'FVS({}) Ht Curve sp={}'.format(
+        s = 'FVS-{} Height Curve (sp={})'.format(
                 self.fvs_variant, self.spp)
         return s
 
@@ -988,7 +990,7 @@ class FVS_SiteCurve(SiteCurve):
 
     @property
     def abbreviation(self):
-        s = 'FVS {} ({})'.format(self.spp, self.fvs_variant)
+        s = 'FVS {} ({})'.format(self.fvs_variant, self.spp)
         return s
 
     @abbreviation.setter
@@ -1000,7 +1002,7 @@ class FVS_SiteCurve(SiteCurve):
 
         """
 
-        if self.fvs_variant in ('PN', 'WC'):
+        if self.fvs_variant in ('PN', 'WC', 'OP'):
             ht = self.fvs.htcalc(si, self.spp_idx, bha)
 
         elif self.fvs_variant in ('SO', 'CA', 'OC'):
