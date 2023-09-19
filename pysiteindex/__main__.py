@@ -25,7 +25,8 @@ if __name__ == '__main__' and __package__ is None:
 
 def curve_docs():
     keys = sorted(pysiteindex.curves.keys())
-    msg = 'Available Site Index Curves:\n'
+    # msg = 'Available Site Index Curves:\n'
+    docs = []
     for key in keys:
         sf = pysiteindex.curves[key]
         try:
@@ -33,16 +34,20 @@ def curve_docs():
                 sc = sf('PN','DF',708)
             else:
                 sc = sf()
-            
+
             ds = sc.__doc__.strip().split('\n')[0]
-            
+
         except:
-            ds = ''
-        
-        msg += '{}: {}\n'.format(key, ds)
-        
+            # ds = '* Not Installed *'
+            # key = f'*{key}'
+            continue
+
+        docs.append(f'{key}: {ds}')
+
+    docs = '\n  '.join(docs)
+    msg = f'Site Index Curves:\n  {docs}'
     return msg
-    
+
 @click.command()
 @click.option('--curve', '-c', required=True, help='Site curve name.')
 @click.option('--age', '-a', required=True, type=float, help='Tree age - BHA, TTA, etc. see curve description.')
@@ -52,18 +57,18 @@ def curve_docs():
 @click.option('--species', '-s', required=False, type=str, help='FVS species code when curve="fvs".')
 def si(curve, age, height, variant=None, forest=0, species=None):
     """
-    Return the site index estimate for a single tree.
+    Return a site index estimate for a single tree.
     """
     if curve.lower()=='fvs' and species is None:
         raise AttributeError('A valid species is required for curve=="fvs"')
-        
-    sc = curves[curve](variant, species, forest_code=forest)
+
+    sc = curves[curve.lower()](variant.lower(), species, forest_code=forest)
     si = sc.site_index(age, height)
     if sc.index_bha:
         ref = 'bha'
     else:
         ref = 'tta'
-        
+
     print('{:.2f}{} @{}={}'.format(si, sc.units, ref, sc.index_age))
 
 @click.command()
@@ -75,15 +80,15 @@ def si(curve, age, height, variant=None, forest=0, species=None):
 @click.option('--species', '-s', required=False, type=str, help='FVS species code when curve="fvs".')
 def ht(curve, age, site_index, variant=None, forest=0, species=None):
     """
-    Return the estimated height of a single tree for a given age and site index.
+    Return an estimated height for a single tree of a given age and site index.
     """
     if curve.lower()=='fvs' and species is None:
         raise AttributeError('A valid species is required for curve=="fvs"')
-    
+
     if curve.lower()=='fvs' and not variant:
         raise AttributeError('A FVS variant (e.g. -v=pn) is required for curve=="fvs"')
 
-    sc = curves[curve](variant, species, forest_code=forest)
+    sc = curves[curve.lower()](variant.lower(), species, forest_code=forest)
 
     if sc.index_bha:
         ref = 'bha'
@@ -97,7 +102,7 @@ def ht(curve, age, site_index, variant=None, forest=0, species=None):
 
     for a,ht in hts.items():
         print('{:.2f}{} @{}={}'.format(ht, sc.units, ref, a))
-    
+
 @click.group(invoke_without_command=True)
 @click.option('--help-curves', is_flag=True, default=False, help='Return a list of supported site curve funtions.')
 @click.pass_context

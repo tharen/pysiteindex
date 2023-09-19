@@ -190,16 +190,20 @@ class SiteCurve(object):
     @abc.abstractmethod
     def site_index(self, bha, ht):
         """
-        Return and estimate of site index given an age, height pair.
+        Return an estimate of site index given age, height pair(s).
 
         NOTE: If not implemented the `find_si` search function is used.
         """
-        si = self.find_si(bha, ht)
+        if hasattr(bha, '__iter__') or hasattr(ht, '__iter__'):
+            si = self.v_site_index(bha, ht)
+        else:
+            si = self.find_si(bha, ht)
+
         return si
 
     def v_height(self, bha, si):
         """
-        Return and array of heights.  Vectorized form of `self.height`.
+        Return an array of heights.  Vectorized form of `self.height`.
         """
         func = np.vectorize(self.height)
         ht = func(bha, si)
@@ -276,6 +280,17 @@ class SiteCurve(object):
 
         return df
 
+    def age(self, si, ht):
+        """
+        Return an estimated breast-height age
+
+        Args
+        ----
+        si: Site index
+        ht: Total height
+        """
+        return self.find_bha(si, ht)
+
     def find_bha(self, si, ht, ht_err=0.1, max_steps=50):
         """
         Return an estimate of breast height age for a site_index, height pair.
@@ -298,6 +313,17 @@ class SiteCurve(object):
             , min_bha=None, max_bha=None
             , si_incr=None, min_si=None, max_si=None
             , **kwargs):
+        """
+        Return a height growth chart as a matplotlib axis object.
+
+        Args
+        ----
+        min_bha: Minimum breast height age to plot
+        max_bha: Maximum breast height age to plot
+        si_incr: Site index increment between each line
+        min_si: Minimum site index to plot
+        max_si: Maximum site index to plot
+        """
 
         keys = ['min_bha', 'max_bha', 'si_incr', 'min_si', 'max_si']
         args = {}
@@ -326,7 +352,7 @@ class SiteCurve(object):
 #         l = ax.legend(loc='best', title='Site Index')
         p = ax.set_title('Height Growth Rate\n{}'.format(self.name))
         p = ax.set_xlabel('Breast Height Age')
-        p = ax.set_ylabel('Annual Height Growth (ft)')
+        p = ax.set_ylabel('Annual Height Growth (ft/yr)')
 
         ax.axvline(self.index_age, color='grey', linestyle='dashed', linewidth=1.0)
 
@@ -337,6 +363,17 @@ class SiteCurve(object):
             , min_bha=None, max_bha=None
             , si_incr=None, min_si=None, max_si=None
             , **kwargs):
+        """
+        Return site index height curves as a matplotlib axis object
+
+        Args
+        ----
+        min_bha: Minimum breast height age to plot
+        max_bha: Maximum breast height age to plot
+        si_incr: Site index increment between each line
+        min_si: Minimum site index to plot
+        max_si: Maximum site index to plot
+        """
 
         if max_bha is None:
             max_bha = self.index_age * 3
