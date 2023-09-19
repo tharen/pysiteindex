@@ -9,12 +9,12 @@ from setuptools import setup, find_packages
 with open('version') as f:
     buff = f.read()
     version = re.search('(\d+\.\d+\.\d+)', buff).groups()[0]
-    
+
 with open('readme.md') as f:
     buff = f.read()
     description = buff.split('\n')[2].strip()
     long_description = buff.strip()
-    
+
 shutil.copyfile('./readme.md', 'pysiteindex/readme.md')
 
 setup(
