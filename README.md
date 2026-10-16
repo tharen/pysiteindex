@@ -1,4 +1,4 @@
-*** pysiteindex development and maintenance has moved ***
+# *** pysiteindex development and maintenance has moved ***
 Please visit [forest-modeling/pysiteindex](https://github.com/forest-modeling/pysiteindex) for more recent updates. This fork will be archived.
 
 # pysiteindex
